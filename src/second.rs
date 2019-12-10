@@ -1,7 +1,5 @@
 use std::fmt;
-use std::mem;
-// Structure;
-//
+
 #[derive(Debug)]
 pub struct List {
     head: Link,
@@ -15,10 +13,10 @@ impl fmt::Display for List {
 
 impl Drop for List {
     fn drop(&mut self) {
-        let mut cur_link = mem::replace(&mut self.head, None);
+        let mut cur_link = self.head.take();
 
         while let Some(mut boxed_node) = cur_link {
-            cur_link = mem::replace(&mut boxed_node.next, None);
+            cur_link = boxed_node.next.take();
             // boxed_node goes out of scope and gets dropped here;
             // but its Node's `next` field has been set to None
             // so no unbounded recursion occurs.
@@ -34,20 +32,16 @@ impl List {
     fn push(&mut self, elem: i32) {
         let new_node = Node {
             elem,
-            // mem::replace steals a value out of a borrow by replacing it with another value
-            next: mem::replace(&mut self.head, None),
+            next: self.head.take(),
         };
         self.head = Some(Box::new(new_node));
     }
 
     fn pop(&mut self) -> Option<i32> {
-        match mem::replace(&mut self.head, None) {
-            None => None,
-            Some(node) => {
-                self.head = node.next;
-                Some(node.elem)
-            }
-        }
+        self.head.take().map(|node| {
+            self.head = node.next;
+            node.elem
+        })
     }
 }
 

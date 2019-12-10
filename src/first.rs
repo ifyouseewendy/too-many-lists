@@ -1,7 +1,6 @@
 use std::fmt;
 use std::mem;
-// Structure;
-//
+
 #[derive(Debug)]
 pub struct List {
     head: Link,
