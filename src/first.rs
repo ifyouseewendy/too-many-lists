@@ -1,4 +1,5 @@
 use std::fmt;
+use std::mem;
 // Structure;
 //
 #[derive(Debug)]
@@ -9,6 +10,17 @@ pub struct List {
 impl fmt::Display for List {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.head)
+    }
+}
+
+impl List {
+    fn push(&mut self, elem: i32) {
+        let new_node = Node {
+            elem,
+            // mem::replace steals a value out of a borrow by replacing it with another value
+            next: mem::replace(&mut self.head, Link::Empty),
+        };
+        self.head = Link::More(Box::new(new_node));
     }
 }
 
