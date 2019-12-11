@@ -67,6 +67,23 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
+// Drop
+//
+// Rc only give shared access, we could only try_unwrap
+impl<T> Drop for List<T> {
+    fn drop(&mut self) {
+        let mut cur_node = self.head.take();
+
+        while let Some(node) = cur_node {
+            if let Ok(mut node) = Rc::try_unwrap(node) {
+                cur_node = node.next.take();
+            } else {
+                break;
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use super::List;
