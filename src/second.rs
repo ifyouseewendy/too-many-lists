@@ -1,17 +1,16 @@
 use std::fmt;
 
-#[derive(Debug)]
-pub struct List {
-    head: Link,
+pub struct List<T> {
+    head: Link<T>,
 }
 
-impl fmt::Display for List {
+impl<T: fmt::Debug> fmt::Debug for List<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{:?}", self.head)
     }
 }
 
-impl Drop for List {
+impl<T> Drop for List<T> {
     fn drop(&mut self) {
         let mut cur_link = self.head.take();
 
@@ -24,12 +23,12 @@ impl Drop for List {
     }
 }
 
-impl List {
+impl<T> List<T> {
     fn new() -> Self {
         Self { head: None }
     }
 
-    fn push(&mut self, elem: i32) {
+    fn push(&mut self, elem: T) {
         let new_node = Node {
             elem,
             next: self.head.take(),
@@ -37,7 +36,7 @@ impl List {
         self.head = Some(Box::new(new_node));
     }
 
-    fn pop(&mut self) -> Option<i32> {
+    fn pop(&mut self) -> Option<T> {
         self.head.take().map(|node| {
             self.head = node.next;
             node.elem
@@ -45,21 +44,12 @@ impl List {
     }
 }
 
-type Link = Option<Box<Node>>;
-
-// impl fmt::Display for Link {
-//     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-//         match self {
-//             None => write!(f, "()"),
-//             Some(ref node) => write!(f, "{} -> {}", node.elem, format!("{}", &node.next)),
-//         }
-//     }
-// }
+type Link<T> = Option<Box<Node<T>>>;
 
 #[derive(Debug)]
-struct Node {
-    elem: i32,
-    next: Link,
+struct Node<T> {
+    elem: T,
+    next: Link<T>,
 }
 
 #[cfg(test)]
@@ -74,7 +64,7 @@ mod tests {
 
         let list = List { head: Some(Box::new(node)) };
 
-        assert_eq!("Some(Node { elem: 1, next: Some(Node { elem: 2, next: Some(Node { elem: 3, next: None }) }) })", format!("{}", list));
+        assert_eq!("Some(Node { elem: 1, next: Some(Node { elem: 2, next: Some(Node { elem: 3, next: None }) }) })", format!("{:?}", list));
     }
 
     #[test]
